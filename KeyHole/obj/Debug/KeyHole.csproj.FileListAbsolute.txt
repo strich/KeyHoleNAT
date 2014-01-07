@@ -1,0 +1,5 @@
+c:\users\scott.richmond\documents\visual studio 2012\Projects\KeyHole\KeyHole\obj\Debug\KeyHole.csprojResolveAssemblyReference.cache
+c:\users\scott.richmond\documents\visual studio 2012\Projects\KeyHole\KeyHole\bin\Debug\KeyHole.dll
+c:\users\scott.richmond\documents\visual studio 2012\Projects\KeyHole\KeyHole\bin\Debug\KeyHole.pdb
+c:\users\scott.richmond\documents\visual studio 2012\Projects\KeyHole\KeyHole\obj\Debug\KeyHole.dll
+c:\users\scott.richmond\documents\visual studio 2012\Projects\KeyHole\KeyHole\obj\Debug\KeyHole.pdb
