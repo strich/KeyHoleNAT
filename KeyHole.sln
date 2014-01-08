@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyHole", "KeyHole\KeyHole.csproj", "{E1AAF784-A79F-4019-9E4E-393A898BDE7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyHoleTests", "KeyHoleTests\KeyHoleTests.csproj", "{EC3AC926-2E9C-4892-890B-585D530E09BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
