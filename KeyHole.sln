@@ -5,20 +5,36 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyHole", "KeyHole\KeyHole.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyHoleTests", "KeyHoleTests\KeyHoleTests.csproj", "{EC3AC926-2E9C-4892-890B-585D530E09BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UPnP", "UPnP\UPnP.csproj", "{584ED187-8F2A-4B58-A266-85F3F212B092}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1AAF784-A79F-4019-9E4E-393A898BDE7D}.Release|x64.ActiveCfg = Release|Any CPU
 		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC3AC926-2E9C-4892-890B-585D530E09BF}.Release|x64.ActiveCfg = Release|Any CPU
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Debug|x64.ActiveCfg = Debug|x64
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Debug|x64.Build.0 = Debug|x64
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Release|x64.ActiveCfg = Release|x64
+		{584ED187-8F2A-4B58-A266-85F3F212B092}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

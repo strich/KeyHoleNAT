@@ -37,13 +37,16 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UPnP">
-      <HintPath>..\..\..\Libraries\DeveloperToolsForUPnP\Global\UPnP\bin\Release\UPnP.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UPnP\UPnP.csproj">
+      <Project>{584ed187-8f2a-4b58-a266-85f3f212b092}</Project>
+      <Name>UPnP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
