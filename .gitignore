@@ -1,1 +1,6 @@
 _ReSharper.KeyHole/
+KeyHole/obj
+KeyHole/bin
+
+KeyHoleTests/obj
+KeyHoleTests/bin
