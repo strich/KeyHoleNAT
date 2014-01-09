@@ -40,7 +40,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectionManager.cs" />
+    <Compile Include="GlobalOptions.cs" />
+    <Compile Include="KeyHole.cs" />
+    <Compile Include="ProgressUpdateEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Modules\UPNPModule.cs" />
+    <Compile Include="STUNOptions.cs" />
+    <Compile Include="UPNPOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UPnP\UPnP.csproj">
