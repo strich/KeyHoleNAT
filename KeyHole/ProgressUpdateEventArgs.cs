@@ -1,5 +1,7 @@
 ﻿namespace KeyHole {
     public class ProgressUpdateEventArgs : System.EventArgs {
-        public string ProgressUpdate;
+        public EventLoggingLevel LoggingLevel;
+        public string MessageDescription;
+        public int MessageCode;
     }
 }
