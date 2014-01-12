@@ -5,19 +5,19 @@
         public event ProgressUpdateHandler ProgressUpdate;
         public event ProgressUpdateHandler ProgressFinished;
 
-        protected virtual void OnProgressUpdate(ProgressUpdateEventArgs e) {
+        protected void OnProgressUpdate(ProgressUpdateEventArgs e) {
             if (ProgressUpdate != null) {
                 ProgressUpdate(this, e);
             }
         }
 
-        protected virtual void OnProgressUpdate(string update) {
+        protected void OnProgressUpdate(string update) {
             OnProgressUpdate(new ProgressUpdateEventArgs {
                 MessageDescription = update
             });
         }
 
-        protected virtual void OnProgressFinished(ProgressUpdateEventArgs e) {
+        protected void OnProgressFinished(ProgressUpdateEventArgs e) {
             if (ProgressUpdate != null) {
                 ProgressUpdate(this, e);
             }

@@ -25,6 +25,8 @@ namespace KeyHole {
         }
 
         private void OnUPNPDiscoveryPhaseEnd() {
+            // Set the instance of UPNPSmartControlPoint to null for garbage collection:
+            scp = null;
             OnProgressUpdate("[UPNP] Finished discovery scan.");
             OnProgressUpdate("[UPNP] Found " + activeDevices.Count + " UPnP enabled devices.");
 
@@ -36,6 +38,9 @@ namespace KeyHole {
             // Attempt to port map on all devices found:
             // TODO: Figure out which device is the gateway
             foreach (DeviceServices device in activeDevices) {
+                var c = device.Device.LocalIPEndPoints;
+                var b = device.Device.InterfaceToHost;
+                var a = device.Device.RemoteEndPoint.Address;
                 UPnPService service = device.Services.First(s => s.ServiceID == "urn:upnp-org:serviceId:WANIPConn1" ||
                                                                  s.ServiceID == "urn:upnp-org:serviceId:WANIPConn2");
 
