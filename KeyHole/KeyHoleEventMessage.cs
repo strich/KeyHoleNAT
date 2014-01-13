@@ -14,6 +14,7 @@
     public enum MessageCode {
         None = 0,
         Success,
-        ErrUnknown
+        ErrUnknown,
+        ErrNoUPnPDevice
     }
 }

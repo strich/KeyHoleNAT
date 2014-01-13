@@ -4,9 +4,6 @@ using KeyHole;
 namespace KeyHoleTests {
 	class Program {
 		static void Main(string[] args) {
-			//ConnectionManager cm = new ConnectionManager();
-			//cm.CreateServer();
-
 		    KeyHole.KeyHole kh = new KeyHole.KeyHole(
                 upnpOptions: new UPNPOptions(
                     enabled: true,
@@ -15,8 +12,8 @@ namespace KeyHoleTests {
                     enabled: true,
                     timeout: 5000),
                 globalOptions: new GlobalOptions(
-                    loggingLevel: EventLoggingLevel.Debug,
-                    preferredPort: 11112),
+                    portToBind: 21899,
+                    loggingLevel: EventLoggingLevel.Debug),
                 onProgressUpdate: HandleProgressUpdate,
                 onProgressFinished: HandleProgressFinish);
 
@@ -25,12 +22,12 @@ namespace KeyHoleTests {
 			while(true) { }
 		}
 
-	    private static void HandleProgressFinish(KeyHole.KeyHole sender, KeyHoleEventMessage progressUpdateEventArgs) {
-            Console.WriteLine("[FINISHED] " + progressUpdateEventArgs.MessageDescription);
+	    private static void HandleProgressFinish(KeyHole.KeyHole sender, KeyHoleEventMessage keyHoleEventMessage) {
+            Console.WriteLine("[FINISHED " + keyHoleEventMessage.MessageCode + "] " + keyHoleEventMessage.MessageDescription);
 	    }
 
-	    private static void HandleProgressUpdate(KeyHole.KeyHole sender, KeyHoleEventMessage progressUpdateEventArgs) {
-	        Console.WriteLine(progressUpdateEventArgs.MessageDescription);
+        private static void HandleProgressUpdate(KeyHole.KeyHole sender, KeyHoleEventMessage keyHoleEventMessage) {
+            Console.WriteLine(keyHoleEventMessage.MessageDescription);
 	    }
 	}
 }

@@ -5,11 +5,11 @@ using OpenSource.UPnP;
 
 namespace KeyHole {
     public class UPNPModule : Module {
-
         // Devices listed here have an active port map on them
-        private readonly List<DeviceServices> activeDevices = new List<DeviceServices>();
-        private SafeTimer timeoutTimer;
-        private UPnPSmartControlPoint scp;
+        private readonly List<DeviceServices> _activeDevices = new List<DeviceServices>();
+        private readonly SafeTimer _discoveryTimeoutTimer;
+        private readonly SafeTimer _portmapTimeoutTimer;
+        private UPnPSmartControlPoint _scp;
 
         private UPNPOptions UPNPOptions;
 
@@ -19,25 +19,39 @@ namespace KeyHole {
             ProgressUpdate += onProgressUpdate;
             ProgressFinish += onProgressFinish;
 
-            // Setup the timer:
-            timeoutTimer = new SafeTimer(upnpOptions.Timeout, false);
-            timeoutTimer.OnElapsed += OnUPNPDiscoveryPhaseEnd;
+            // Setup the discovery phase timer:
+            _discoveryTimeoutTimer = new SafeTimer(upnpOptions.Timeout, false);
+            _discoveryTimeoutTimer.OnElapsed += OnUPNPDiscoveryPhaseEnd;
+
+            // Setup the port map timer:
+            _discoveryTimeoutTimer = new SafeTimer(2000, false);
+            _discoveryTimeoutTimer.OnElapsed += OnUPNPPortMapFail;
+        }
+
+        private void OnUPNPPortMapFail() {
+            OnProgressFinish(new KeyHoleEventMessage(
+                messageDescription: "Port Mapping failed with an unknown timeout error.",
+                messageCode: MessageCode.ErrUnknown,
+                loggingLevel: EventLoggingLevel.Informational));
         }
 
         private void OnUPNPDiscoveryPhaseEnd() {
             // Set the instance of UPNPSmartControlPoint to null for garbage collection:
-            scp = null;
-            OnProgressUpdate("[UPNP] Finished discovery scan.");
-            OnProgressUpdate("[UPNP] Found " + activeDevices.Count + " UPnP enabled devices.");
+            _scp = null;
+            OnProgressUpdate("Finished discovery scan.");
+            OnProgressUpdate("Found " + _activeDevices.Count + " UPnP enabled devices.");
 
             // If there are no devices capable of UPnP Port Mapping then exit as failed:
-            if (activeDevices.Count == 0) {
-                
+            if (_activeDevices.Count == 0) {
+                OnProgressFinish(new KeyHoleEventMessage(
+                    messageDescription: "No UPnP capable devices were found.",
+                    messageCode: MessageCode.ErrNoUPnPDevice,
+                    loggingLevel: EventLoggingLevel.Informational));
             }
 
             // Attempt to port map on all devices found:
             // TODO: Figure out which device is the gateway
-            foreach (DeviceServices device in activeDevices) {
+            foreach (DeviceServices device in _activeDevices) {
                 // TODO remove this:
                 //var localIP = device.Device.InterfaceToHost;
                 //var remoteIP = device.Device.RemoteEndPoint.Address;
@@ -57,13 +71,18 @@ namespace KeyHole {
                 };
 
                 try {
+                    _portmapTimeoutTimer.Start();
+
                     service.InvokeAsync(portMappingAction.Name,
-                                        upnpArgs.ToArray(), null,
-                                        HandleInvoke,
-                                        HandleInvokeError);
-                } catch (UPnPInvokeException ie) {
+                        upnpArgs.ToArray(), null,
+                        HandleInvoke,
+                        HandleInvokeError);
+                }
+                catch (UPnPInvokeException ie) {
+                    _portmapTimeoutTimer.dispose(); // Discard the timer.
+
                     OnProgressFinish(new KeyHoleEventMessage(
-                        messageDescription: "[UPNP] UPnPInvokeException: " + ie.Message,
+                        messageDescription: "UPnPInvokeException: " + ie.Message,
                         messageCode: MessageCode.ErrUnknown,
                         loggingLevel: EventLoggingLevel.Informational));
                 }
@@ -71,31 +90,32 @@ namespace KeyHole {
         }
 
         private void HandleInvokeError(UPnPService sender, string methodname, UPnPArgument[] args, UPnPInvokeException e,
-                                       object tag) {
+            object tag) {
             if (e.UPNP == null) {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "[UPNP] UPnPInvokeException: " + e,
+                    messageDescription: "UPnPInvokeException: " + e,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
             }
             else {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "[UPNP] UPnPInvokeException: " + e.UPNP.ErrorCode + " : " +
-                                  e.UPNP.ErrorDescription,
+                    messageDescription: "UPnPInvokeException: " + e.UPNP.ErrorCode + " : " +
+                                        e.UPNP.ErrorDescription,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
             }
         }
 
-        private void HandleInvoke(UPnPService sender, string methodname, UPnPArgument[] args, object returnvalue, object tag) {
+        private void HandleInvoke(UPnPService sender, string methodname, UPnPArgument[] args, object returnvalue,
+            object tag) {
             OnProgressFinish(new KeyHoleEventMessage(
-                messageDescription: "[UPNP] UPnP Successfully mapped a port.",
+                messageDescription: "UPnP Successfully mapped a port.",
                 messageCode: MessageCode.Success,
                 loggingLevel: EventLoggingLevel.Informational));
         }
 
         private void OnDeviceDiscovery(UPnPSmartControlPoint sender, UPnPDevice device) {
-            OnProgressUpdate("[UPNP] Discovered new device: " + device.FriendlyName + " of type " + device.StandardDeviceType);
+            OnProgressUpdate("Discovered new device: " + device.FriendlyName + " of type " + device.StandardDeviceType);
 
             var services = new List<UPnPService>();
 
@@ -106,31 +126,41 @@ namespace KeyHole {
             // Check if it contains the port mapping services and save it for later if it does:
             if (services.Count(service => service.ServiceID == "urn:upnp-org:serviceId:WANIPConn1" ||
                                           service.ServiceID == "urn:upnp-org:serviceId:WANIPConn2") != 0) {
-                var ds = new DeviceServices { Device = device, Services = services };
-                activeDevices.Add(ds);
+                var ds = new DeviceServices {Device = device, Services = services};
+                _activeDevices.Add(ds);
             }
 
-            OnProgressUpdate("[UPNP] Finished discovering the services of " + device.FriendlyName);
+            OnProgressUpdate("Finished discovering the services of " + device.FriendlyName);
         }
 
+        /// <summary>
+        /// Discover all the services of the device and lay it out into a flat array.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="services"></param>
         private void DiscoverDeviceServices(UPnPDevice device, List<UPnPService> services) {
             // Discover services:
             services.AddRange(device.Services);
 
+            // Recursive call into the device tree:
             foreach (UPnPDevice childDevice in device.EmbeddedDevices) {
                 DiscoverDeviceServices(childDevice, services);
             }
         }
 
+
         public void Start() {
-            OnProgressUpdate("[UPNP] Beginning discovery scan.");
+            OnProgressUpdate("Beginning discovery scan.");
 
             // Start timer:
-            timeoutTimer.Start();
+            _discoveryTimeoutTimer.Start();
 
             // Setup the UPnP Smart Control Point:
-            scp = new UPnPSmartControlPoint(OnDeviceDiscovery);
+            _scp = new UPnPSmartControlPoint(OnDeviceDiscovery);
+        }
 
+        public override string ToString() {
+            return "UPNP";
         }
     }
 }

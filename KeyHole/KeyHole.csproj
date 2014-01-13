@@ -39,7 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionManager.cs" />
+    <Compile Include="DeviceServices.cs" />
     <Compile Include="GlobalOptions.cs" />
     <Compile Include="KeyHole.cs" />
     <Compile Include="Module.cs" />

@@ -2,11 +2,11 @@
 
 namespace KeyHole {
     public class GlobalOptions {
-        public UInt16 PreferredPort;
+        public UInt16 PortToBind;
         public EventLoggingLevel LoggingLevel;
 
-        public GlobalOptions(UInt16 preferredPort = 0, EventLoggingLevel loggingLevel = EventLoggingLevel.Informational) {
-            PreferredPort = preferredPort;
+        public GlobalOptions(UInt16 portToBind, EventLoggingLevel loggingLevel = EventLoggingLevel.Informational) {
+            PortToBind = portToBind;
             LoggingLevel = loggingLevel;
         }
     }

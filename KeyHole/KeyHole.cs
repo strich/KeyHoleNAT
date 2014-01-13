@@ -11,7 +11,7 @@ namespace KeyHole {
 
         private UPNPModule upnpModule;
 
-        public KeyHole() : this(new UPNPOptions(), new STUNOptions(), new GlobalOptions(), null, null) {}
+        public KeyHole(GlobalOptions globalOptions) : this(new UPNPOptions(), new STUNOptions(), globalOptions, null, null) { }
 
         public KeyHole(UPNPOptions upnpOptions, STUNOptions stunOptions, GlobalOptions globalOptions,
             ProgressUpdateHandler onProgressUpdate, ProgressUpdateHandler onProgressFinished) {
@@ -23,13 +23,15 @@ namespace KeyHole {
             OnProgressFinish += onProgressFinished;
         }
 
+        /// <summary>
+        /// Asyncronous method to bind the port specified in the Global Options within the given timeout
+        /// period.
+        /// </summary>
         public void BindPort() {
             // Attempt to bind a port via UPNP:
             upnpModule = new UPNPModule(UPNPOptions, HandleProgressUpdate, HandleProgressFinish);
             upnpModule.Start();
         }
-
-        
 
         public void BindSocket() {
             // TODO
