@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace KeyHole {
-    public class KeyHole {
-        public delegate void ProgressUpdateHandler(KeyHole sender, KeyHoleEventMessage e);
+﻿namespace KeyHoleNAT {
+    public class NATController {
+        public delegate void ProgressUpdateHandler(NATController sender, KeyHoleEventMessage e);
 
         public GlobalOptions GlobalOptions;
         public STUNOptions STUNOptions;
@@ -11,9 +8,9 @@ namespace KeyHole {
 
         private UPNPModule upnpModule;
 
-        public KeyHole(GlobalOptions globalOptions) : this(new UPNPOptions(), new STUNOptions(), globalOptions, null, null) { }
+        public NATController(GlobalOptions globalOptions) : this(new UPNPOptions(), new STUNOptions(), globalOptions, null, null) { }
 
-        public KeyHole(UPNPOptions upnpOptions, STUNOptions stunOptions, GlobalOptions globalOptions,
+        public NATController(UPNPOptions upnpOptions, STUNOptions stunOptions, GlobalOptions globalOptions,
             ProgressUpdateHandler onProgressUpdate, ProgressUpdateHandler onProgressFinished) {
             UPNPOptions = upnpOptions;
             STUNOptions = stunOptions;
@@ -48,7 +45,7 @@ namespace KeyHole {
             OnProgressFinish(this, keyHoleEventMessage);
         }
 
-        ~KeyHole() {
+        ~NATController() {
             // TODO
         }
     }

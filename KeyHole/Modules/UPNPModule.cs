@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenSource.UPnP;
 
-namespace KeyHole {
+namespace KeyHoleNAT {
     public class UPNPModule : Module {
         // Devices listed here have an active port map on them
         private readonly List<DeviceServices> _activeDevices = new List<DeviceServices>();

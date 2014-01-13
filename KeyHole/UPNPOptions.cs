@@ -1,4 +1,4 @@
-﻿namespace KeyHole {
+﻿namespace KeyHoleNAT {
     public class UPNPOptions {
         public bool Enabled;
         public int Timeout;

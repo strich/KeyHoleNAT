@@ -1,4 +1,4 @@
-﻿namespace KeyHole {
+﻿namespace KeyHoleNAT {
     public class STUNOptions {
         public bool Enabled;
         public int Timeout;

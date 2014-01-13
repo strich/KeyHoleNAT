@@ -1,10 +1,10 @@
 ﻿using System;
-using KeyHole;
+using KeyHoleNAT;
 
 namespace KeyHoleTests {
 	class Program {
 		static void Main(string[] args) {
-		    KeyHole.KeyHole kh = new KeyHole.KeyHole(
+            NATController nc = new NATController(
                 upnpOptions: new UPNPOptions(
                     enabled: true,
                     timeout: 5000),
@@ -17,16 +17,16 @@ namespace KeyHoleTests {
                 onProgressUpdate: HandleProgressUpdate,
                 onProgressFinished: HandleProgressFinish);
 
-            kh.BindPort();
+            nc.BindPort();
 
 			while(true) { }
 		}
 
-	    private static void HandleProgressFinish(KeyHole.KeyHole sender, KeyHoleEventMessage keyHoleEventMessage) {
+        private static void HandleProgressFinish(NATController sender, KeyHoleEventMessage keyHoleEventMessage) {
             Console.WriteLine("[FINISHED " + keyHoleEventMessage.MessageCode + "] " + keyHoleEventMessage.MessageDescription);
 	    }
 
-        private static void HandleProgressUpdate(KeyHole.KeyHole sender, KeyHoleEventMessage keyHoleEventMessage) {
+        private static void HandleProgressUpdate(NATController sender, KeyHoleEventMessage keyHoleEventMessage) {
             Console.WriteLine(keyHoleEventMessage.MessageDescription);
 	    }
 	}

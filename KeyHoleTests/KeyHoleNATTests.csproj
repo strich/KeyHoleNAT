@@ -52,9 +52,9 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KeyHole\KeyHole.csproj">
+    <ProjectReference Include="..\KeyHole\KeyHoleNAT.csproj">
       <Project>{e1aaf784-a79f-4019-9e4e-393a898bde7d}</Project>
-      <Name>KeyHole</Name>
+      <Name>KeyHoleNAT</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

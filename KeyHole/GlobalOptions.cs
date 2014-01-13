@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace KeyHole {
+namespace KeyHoleNAT {
     public class GlobalOptions {
         public UInt16 PortToBind;
         public EventLoggingLevel LoggingLevel;

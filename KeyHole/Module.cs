@@ -1,4 +1,4 @@
-﻿namespace KeyHole {
+﻿namespace KeyHoleNAT {
     public class Module {
         public delegate void ProgressUpdateHandler(object sender, KeyHoleEventMessage e);
         public event ProgressUpdateHandler ProgressUpdate;

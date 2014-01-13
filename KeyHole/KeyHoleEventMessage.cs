@@ -1,4 +1,4 @@
-﻿namespace KeyHole {
+﻿namespace KeyHoleNAT {
     public class KeyHoleEventMessage : System.EventArgs {
         public EventLoggingLevel LoggingLevel;
         public string MessageDescription;
