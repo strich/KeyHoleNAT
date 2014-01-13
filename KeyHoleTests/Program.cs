@@ -18,18 +18,18 @@ namespace KeyHoleTests {
                     loggingLevel: EventLoggingLevel.Debug,
                     preferredPort: 11112),
                 onProgressUpdate: HandleProgressUpdate,
-                onProgressFinished: HandleProgressFinished);
+                onProgressFinished: HandleProgressFinish);
 
             kh.BindPort();
 
 			while(true) { }
 		}
 
-	    private static void HandleProgressFinished(KeyHole.KeyHole sender, ProgressUpdateEventArgs progressUpdateEventArgs) {
-	        throw new NotImplementedException();
+	    private static void HandleProgressFinish(KeyHole.KeyHole sender, KeyHoleEventMessage progressUpdateEventArgs) {
+            Console.WriteLine("[FINISHED] " + progressUpdateEventArgs.MessageDescription);
 	    }
 
-	    private static void HandleProgressUpdate(KeyHole.KeyHole sender, ProgressUpdateEventArgs progressUpdateEventArgs) {
+	    private static void HandleProgressUpdate(KeyHole.KeyHole sender, KeyHoleEventMessage progressUpdateEventArgs) {
 	        Console.WriteLine(progressUpdateEventArgs.MessageDescription);
 	    }
 	}

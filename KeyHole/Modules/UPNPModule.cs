@@ -14,10 +14,10 @@ namespace KeyHole {
         private UPNPOptions UPNPOptions;
 
         public UPNPModule(UPNPOptions upnpOptions, ProgressUpdateHandler onProgressUpdate,
-            ProgressUpdateHandler onProgressFinished) {
+            ProgressUpdateHandler onProgressFinish) {
             UPNPOptions = upnpOptions;
             ProgressUpdate += onProgressUpdate;
-            ProgressFinished += onProgressFinished;
+            ProgressFinish += onProgressFinish;
 
             // Setup the timer:
             timeoutTimer = new SafeTimer(upnpOptions.Timeout, false);
@@ -38,23 +38,23 @@ namespace KeyHole {
             // Attempt to port map on all devices found:
             // TODO: Figure out which device is the gateway
             foreach (DeviceServices device in activeDevices) {
-                var c = device.Device.LocalIPEndPoints;
-                var b = device.Device.InterfaceToHost;
-                var a = device.Device.RemoteEndPoint.Address;
+                // TODO remove this:
+                //var localIP = device.Device.InterfaceToHost;
+                //var remoteIP = device.Device.RemoteEndPoint.Address;
                 UPnPService service = device.Services.First(s => s.ServiceID == "urn:upnp-org:serviceId:WANIPConn1" ||
                                                                  s.ServiceID == "urn:upnp-org:serviceId:WANIPConn2");
 
                 UPnPAction portMappingAction = service.GetAction("AddPortMapping");
-                var upnpArgs = new List<UPnPArgument>();
-
-                upnpArgs.Add(new UPnPArgument("NewRemoteHost", ""));
-                upnpArgs.Add(new UPnPArgument("NewExternalPort", (UInt16)11112));
-                upnpArgs.Add(new UPnPArgument("NewProtocol", "TCP"));
-                upnpArgs.Add(new UPnPArgument("NewInternalPort", (UInt16)11112));
-                upnpArgs.Add(new UPnPArgument("NewInternalClient", "192.168.0.90"));
-                upnpArgs.Add(new UPnPArgument("NewEnabled", true));
-                upnpArgs.Add(new UPnPArgument("NewPortMappingDescription", "War for the Overworld"));
-                upnpArgs.Add(new UPnPArgument("NewLeaseDuration", (UInt32)3600));
+                var upnpArgs = new List<UPnPArgument> {
+                    new UPnPArgument("NewRemoteHost", ""),
+                    new UPnPArgument("NewExternalPort", (UInt16) 11112),
+                    new UPnPArgument("NewProtocol", "TCP"),
+                    new UPnPArgument("NewInternalPort", (UInt16) 11112),
+                    new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost),
+                    new UPnPArgument("NewEnabled", true),
+                    new UPnPArgument("NewPortMappingDescription", "War for the Overworld"),
+                    new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
+                };
 
                 try {
                     service.InvokeAsync(portMappingAction.Name,
@@ -62,8 +62,10 @@ namespace KeyHole {
                                         HandleInvoke,
                                         HandleInvokeError);
                 } catch (UPnPInvokeException ie) {
-                    OnProgressUpdate("[UPNP] UPnPInvokeException: " + ie.Message);
-                    // TODO: Do a OnProgressFinish
+                    OnProgressFinish(new KeyHoleEventMessage(
+                        messageDescription: "[UPNP] UPnPInvokeException: " + ie.Message,
+                        messageCode: MessageCode.ErrUnknown,
+                        loggingLevel: EventLoggingLevel.Informational));
                 }
             }
         }
@@ -71,19 +73,25 @@ namespace KeyHole {
         private void HandleInvokeError(UPnPService sender, string methodname, UPnPArgument[] args, UPnPInvokeException e,
                                        object tag) {
             if (e.UPNP == null) {
-                OnProgressUpdate("[UPNP] UPnPInvokeException: " + e);
-                // TODO: Do a OnProgressFinish
+                OnProgressFinish(new KeyHoleEventMessage(
+                    messageDescription: "[UPNP] UPnPInvokeException: " + e,
+                    messageCode: MessageCode.ErrUnknown,
+                    loggingLevel: EventLoggingLevel.Informational));
             }
             else {
-                OnProgressUpdate("[UPNP] UPnPInvokeException: " + e.UPNP.ErrorCode.ToString() + " : " +
-                                  e.UPNP.ErrorDescription);
-                // TODO: Do a OnProgressFinish
+                OnProgressFinish(new KeyHoleEventMessage(
+                    messageDescription: "[UPNP] UPnPInvokeException: " + e.UPNP.ErrorCode + " : " +
+                                  e.UPNP.ErrorDescription,
+                    messageCode: MessageCode.ErrUnknown,
+                    loggingLevel: EventLoggingLevel.Informational));
             }
         }
 
         private void HandleInvoke(UPnPService sender, string methodname, UPnPArgument[] args, object returnvalue, object tag) {
-            OnProgressUpdate("[UPNP] UPnP Successfully mapped a port.");
-            // TODO: Do a OnProgressFinish
+            OnProgressFinish(new KeyHoleEventMessage(
+                messageDescription: "[UPNP] UPnP Successfully mapped a port.",
+                messageCode: MessageCode.Success,
+                loggingLevel: EventLoggingLevel.Informational));
         }
 
         private void OnDeviceDiscovery(UPnPSmartControlPoint sender, UPnPDevice device) {

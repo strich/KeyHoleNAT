@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace KeyHole {
     public class KeyHole {
-        public delegate void ProgressUpdateHandler(KeyHole sender, ProgressUpdateEventArgs e);
+        public delegate void ProgressUpdateHandler(KeyHole sender, KeyHoleEventMessage e);
 
         public GlobalOptions GlobalOptions;
         public STUNOptions STUNOptions;
@@ -20,31 +20,30 @@ namespace KeyHole {
             GlobalOptions = globalOptions;
 
             OnProgressUpdate += onProgressUpdate;
-            OnProgressFinished += onProgressFinished;
-
-            if(OnProgressUpdate != null)
-                OnProgressUpdate(this, new ProgressUpdateEventArgs() {MessageDescription = "Test Starting KeyHole."});
+            OnProgressFinish += onProgressFinished;
         }
 
         public void BindPort() {
             // Attempt to bind a port via UPNP:
-            upnpModule = new UPNPModule(UPNPOptions, HandleProgressUpdate, HandleProgressFinished);
+            upnpModule = new UPNPModule(UPNPOptions, HandleProgressUpdate, HandleProgressFinish);
             upnpModule.Start();
         }
 
-        private void HandleProgressFinished(object sender, ProgressUpdateEventArgs progressUpdateEventArgs) {
-            throw new NotImplementedException();
-        }
+        
 
         public void BindSocket() {
             // TODO
         }
 
         public event ProgressUpdateHandler OnProgressUpdate;
-        public event ProgressUpdateHandler OnProgressFinished;
+        public event ProgressUpdateHandler OnProgressFinish;
 
-        private void HandleProgressUpdate(object sender, ProgressUpdateEventArgs progressUpdateEventArgs) {
-            OnProgressUpdate(this, progressUpdateEventArgs);
+        private void HandleProgressUpdate(object sender, KeyHoleEventMessage keyHoleEventMessage) {
+            OnProgressUpdate(this, keyHoleEventMessage);
+        }
+
+        private void HandleProgressFinish(object sender, KeyHoleEventMessage keyHoleEventMessage) {
+            OnProgressFinish(this, keyHoleEventMessage);
         }
 
         ~KeyHole() {
