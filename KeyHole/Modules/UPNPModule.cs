@@ -11,21 +11,23 @@ namespace KeyHoleNAT {
         private readonly SafeTimer _portmapTimeoutTimer;
         private UPnPSmartControlPoint _scp;
 
-        private UPNPOptions UPNPOptions;
+        private UPNPOptions _upnpOptions;
+	    private GlobalOptions _globalOptions;
 
-        public UPNPModule(UPNPOptions upnpOptions, ProgressUpdateHandler onProgressUpdate,
+        public UPNPModule(UPNPOptions upnpOptions, GlobalOptions globalOptions, ProgressUpdateHandler onProgressUpdate,
             ProgressUpdateHandler onProgressFinish) {
-            UPNPOptions = upnpOptions;
+            _upnpOptions = upnpOptions;
+	        _globalOptions = globalOptions;
             ProgressUpdate += onProgressUpdate;
             ProgressFinish += onProgressFinish;
 
             // Setup the discovery phase timer:
-            _discoveryTimeoutTimer = new SafeTimer(upnpOptions.Timeout, false);
+            _discoveryTimeoutTimer = new SafeTimer(upnpOptions.DiscoveryTimeout, false);
             _discoveryTimeoutTimer.OnElapsed += OnUPNPDiscoveryPhaseEnd;
 
             // Setup the port map timer:
-            _discoveryTimeoutTimer = new SafeTimer(2000, false);
-            _discoveryTimeoutTimer.OnElapsed += OnUPNPPortMapFail;
+			_portmapTimeoutTimer = new SafeTimer(upnpOptions.PortmapTimeout, false);
+			_portmapTimeoutTimer.OnElapsed += OnUPNPPortMapFail;
         }
 
         private void OnUPNPPortMapFail() {
@@ -61,10 +63,10 @@ namespace KeyHoleNAT {
                 UPnPAction portMappingAction = service.GetAction("AddPortMapping");
                 var upnpArgs = new List<UPnPArgument> {
                     new UPnPArgument("NewRemoteHost", ""),
-                    new UPnPArgument("NewExternalPort", (UInt16) 11112),
+                    new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
                     new UPnPArgument("NewProtocol", "TCP"),
-                    new UPnPArgument("NewInternalPort", (UInt16) 11112),
-                    new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost),
+                    new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
+                    new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
                     new UPnPArgument("NewEnabled", true),
                     new UPnPArgument("NewPortMappingDescription", "War for the Overworld"),
                     new UPnPArgument("NewLeaseDuration", (UInt32) 3600)

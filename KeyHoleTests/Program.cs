@@ -7,7 +7,8 @@ namespace KeyHoleTests {
             NATController nc = new NATController(
                 upnpOptions: new UPNPOptions(
                     enabled: true,
-                    timeout: 5000),
+                    discoveryTimeout: 5000,
+					portmapTimeout: 2000),
                 stunOptions: new STUNOptions(
                     enabled: true,
                     timeout: 5000),
