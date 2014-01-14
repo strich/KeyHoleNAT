@@ -24,7 +24,7 @@ namespace KeyHoleTests {
 		}
 
         private static void HandleProgressFinish(NATController sender, KeyHoleEventMessage keyHoleEventMessage) {
-            Console.WriteLine("[FINISHED " + keyHoleEventMessage.MessageCode + "] " + keyHoleEventMessage.MessageDescription);
+            Console.WriteLine(keyHoleEventMessage.MessageDescription);
 	    }
 
         private static void HandleProgressUpdate(NATController sender, KeyHoleEventMessage keyHoleEventMessage) {

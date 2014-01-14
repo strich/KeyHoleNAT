@@ -46,7 +46,7 @@ namespace KeyHoleNAT {
             // If there are no devices capable of UPnP Port Mapping then exit as failed:
             if (_activeDevices.Count == 0) {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "No UPnP capable devices were found.",
+                    messageDescription: "Error: " + MessageCode.ErrNoUPnPDevice + ": No UPnP capable devices were found.",
                     messageCode: MessageCode.ErrNoUPnPDevice,
                     loggingLevel: EventLoggingLevel.Informational));
             }
@@ -57,28 +57,60 @@ namespace KeyHoleNAT {
                 // TODO remove this:
                 //var localIP = device.Device.InterfaceToHost;
                 //var remoteIP = device.Device.RemoteEndPoint.Address;
+                List<UPnPArgument> tcpArgs = null;
+                List<UPnPArgument> udpArgs = null;
+
                 UPnPService service = device.Services.First(s => s.ServiceID == "urn:upnp-org:serviceId:WANIPConn1" ||
                                                                  s.ServiceID == "urn:upnp-org:serviceId:WANIPConn2");
-
                 UPnPAction portMappingAction = service.GetAction("AddPortMapping");
-                var upnpArgs = new List<UPnPArgument> {
-                    new UPnPArgument("NewRemoteHost", ""),
-                    new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
-                    new UPnPArgument("NewProtocol", "TCP"),
-                    new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
-                    new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
-                    new UPnPArgument("NewEnabled", true),
-                    new UPnPArgument("NewPortMappingDescription", "War for the Overworld"),
-                    new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
-                };
+
+                // Setup the UPnP arguments for TCP and/or UDP:
+                if (_globalOptions.IPProtocol == IPProtocol.Both ||
+                    _globalOptions.IPProtocol == IPProtocol.TCP) {
+                    tcpArgs = new List<UPnPArgument> {
+                        new UPnPArgument("NewRemoteHost", ""),
+                        new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
+                        new UPnPArgument("NewProtocol", "TCP"),
+                        new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
+                        new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
+                        new UPnPArgument("NewEnabled", true),
+                        new UPnPArgument("NewPortMappingDescription", _globalOptions.PortDescription),
+                        new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
+                    };
+                }
+                if (_globalOptions.IPProtocol == IPProtocol.Both ||
+                    _globalOptions.IPProtocol == IPProtocol.UDP) {
+                    udpArgs = new List<UPnPArgument> {
+                        new UPnPArgument("NewRemoteHost", ""),
+                        new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
+                        new UPnPArgument("NewProtocol", "UDP"),
+                        new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
+                        new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
+                        new UPnPArgument("NewEnabled", true),
+                        new UPnPArgument("NewPortMappingDescription", _globalOptions.PortDescription),
+                        new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
+                    };
+                }
+
 
                 try {
                     _portmapTimeoutTimer.Start();
 
-                    service.InvokeAsync(portMappingAction.Name,
-                        upnpArgs.ToArray(), null,
-                        HandleInvoke,
-                        HandleInvokeError);
+                    if (_globalOptions.IPProtocol == IPProtocol.Both ||
+                        _globalOptions.IPProtocol == IPProtocol.TCP) {
+                        service.InvokeAsync(portMappingAction.Name,
+                            tcpArgs.ToArray(), null,
+                            HandleInvoke,
+                            HandleInvokeError);
+                    }
+
+                    if (_globalOptions.IPProtocol == IPProtocol.Both ||
+                        _globalOptions.IPProtocol == IPProtocol.UDP) {
+                        service.InvokeAsync(portMappingAction.Name,
+                            udpArgs.ToArray(), null,
+                            HandleInvoke,
+                            HandleInvokeError);
+                    }
                 }
                 catch (UPnPInvokeException ie) {
                     _portmapTimeoutTimer.dispose(); // Discard the timer.
@@ -95,14 +127,14 @@ namespace KeyHoleNAT {
             object tag) {
             if (e.UPNP == null) {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "UPnPInvokeException: " + e,
+                    messageDescription: "Received error trying to map port " + args[2] + args[1] + ". UPnPInvokeException: " + e,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
             }
             else {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "UPnPInvokeException: " + e.UPNP.ErrorCode + " : " +
-                                        e.UPNP.ErrorDescription,
+                    messageDescription: "Received error trying to map port " + args[2] + args[1] + ". UPnPInvokeException: [" + 
+                        e.UPNP.ErrorCode + "] " + e.UPNP.ErrorDescription,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
             }
@@ -111,7 +143,7 @@ namespace KeyHoleNAT {
         private void HandleInvoke(UPnPService sender, string methodname, UPnPArgument[] args, object returnvalue,
             object tag) {
             OnProgressFinish(new KeyHoleEventMessage(
-                messageDescription: "UPnP Successfully mapped a port.",
+                messageDescription: "Successfully mapped port " + args[2] + args[1] + ".",
                 messageCode: MessageCode.Success,
                 loggingLevel: EventLoggingLevel.Informational));
         }

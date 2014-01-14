@@ -26,7 +26,7 @@
         /// </summary>
         public void BindPort() {
             // Attempt to bind a port via UPNP:
-            upnpModule = new UPNPModule(UPNPOptions, HandleProgressUpdate, HandleProgressFinish);
+            upnpModule = new UPNPModule(UPNPOptions, GlobalOptions, HandleProgressUpdate, HandleProgressFinish);
             upnpModule.Start();
         }
 
@@ -43,6 +43,8 @@
 
         private void HandleProgressFinish(object sender, KeyHoleEventMessage keyHoleEventMessage) {
             OnProgressFinish(this, keyHoleEventMessage);
+
+            // TODO: Handle errors here by moving on to the next method of NAT traversal, if necessary.
         }
 
         ~NATController() {

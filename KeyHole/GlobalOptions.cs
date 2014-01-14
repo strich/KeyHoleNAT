@@ -2,14 +2,23 @@
 
 namespace KeyHoleNAT {
     public class GlobalOptions {
-        public UInt16 PortToBind;
-	    public string PortDescription;
+        public IPProtocol IPProtocol;
         public EventLoggingLevel LoggingLevel;
+        public string PortDescription;
+        public UInt16 PortToBind;
 
-        public GlobalOptions(UInt16 portToBind, string portDescription = "", EventLoggingLevel loggingLevel = EventLoggingLevel.Informational) {
+        public GlobalOptions(UInt16 portToBind, IPProtocol ipProtocol = IPProtocol.Both, string portDescription = "",
+            EventLoggingLevel loggingLevel = EventLoggingLevel.Informational) {
             PortToBind = portToBind;
+            IPProtocol = ipProtocol;
             LoggingLevel = loggingLevel;
-	        PortDescription = portDescription;
+            PortDescription = portDescription;
         }
+    }
+
+    public enum IPProtocol {
+        UDP,
+        TCP,
+        Both
     }
 }
