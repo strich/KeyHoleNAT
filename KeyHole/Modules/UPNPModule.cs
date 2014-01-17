@@ -10,9 +10,10 @@ namespace KeyHoleNAT {
         private readonly SafeTimer _discoveryTimeoutTimer;
         private readonly SafeTimer _portmapTimeoutTimer;
         private UPnPSmartControlPoint _scp;
-
         private UPNPOptions _upnpOptions;
 	    private GlobalOptions _globalOptions;
+	    private bool _isUdpBound = false;
+		private bool _isTcpBound = false;
 
         public UPNPModule(UPNPOptions upnpOptions, GlobalOptions globalOptions, ProgressUpdateHandler onProgressUpdate,
             ProgressUpdateHandler onProgressFinish) {
@@ -54,86 +55,83 @@ namespace KeyHoleNAT {
             // Attempt to port map on all devices found:
             // TODO: Figure out which device is the gateway
             foreach (DeviceServices device in _activeDevices) {
-                // TODO remove this:
-                //var localIP = device.Device.InterfaceToHost;
-                //var remoteIP = device.Device.RemoteEndPoint.Address;
-                List<UPnPArgument> tcpArgs = null;
-                List<UPnPArgument> udpArgs = null;
-
+				// Get the correct service type and action for the Port Mapping:
                 UPnPService service = device.Services.First(s => s.ServiceID == "urn:upnp-org:serviceId:WANIPConn1" ||
                                                                  s.ServiceID == "urn:upnp-org:serviceId:WANIPConn2");
-                UPnPAction portMappingAction = service.GetAction("AddPortMapping");
+                UPnPAction addPortMappingAction = service.GetAction("AddPortMapping");
+				UPnPAction deletePortMappingAction = service.GetAction("DeletePortMapping");
 
-                // Setup the UPnP arguments for TCP and/or UDP:
-                if (_globalOptions.IPProtocol == IPProtocol.Both ||
-                    _globalOptions.IPProtocol == IPProtocol.TCP) {
-                    tcpArgs = new List<UPnPArgument> {
-                        new UPnPArgument("NewRemoteHost", ""),
-                        new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
-                        new UPnPArgument("NewProtocol", "TCP"),
-                        new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
-                        new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
-                        new UPnPArgument("NewEnabled", true),
-                        new UPnPArgument("NewPortMappingDescription", _globalOptions.PortDescription),
-                        new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
-                    };
-                }
-                if (_globalOptions.IPProtocol == IPProtocol.Both ||
-                    _globalOptions.IPProtocol == IPProtocol.UDP) {
-                    udpArgs = new List<UPnPArgument> {
-                        new UPnPArgument("NewRemoteHost", ""),
-                        new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
-                        new UPnPArgument("NewProtocol", "UDP"),
-                        new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
-                        new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
-                        new UPnPArgument("NewEnabled", true),
-                        new UPnPArgument("NewPortMappingDescription", _globalOptions.PortDescription),
-                        new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
-                    };
-                }
+                /* Before we try to map a port to ourself, we will delete it in case someone else has already taken it: */
+				// TODO: Add an option to allow the user to enable or disable how aggressive we are being here.
+				try {
+					// Start the port map timeout timer:
+					_portmapTimeoutTimer.Start();
 
+					// Send the Port Map request:
+					if (_globalOptions.IPProtocol == IPProtocol.Both || _globalOptions.IPProtocol == IPProtocol.TCP) {
+						DeletePortMapping(IPProtocol.TCP, deletePortMappingAction, service);
+						AddPortMapping(IPProtocol.TCP, device, addPortMappingAction, service);
+					}
+					if (_globalOptions.IPProtocol == IPProtocol.Both || _globalOptions.IPProtocol == IPProtocol.UDP) {
+						DeletePortMapping(IPProtocol.UDP, deletePortMappingAction, service);
+						AddPortMapping(IPProtocol.UDP, device, addPortMappingAction, service);
+					}
+				} catch (UPnPInvokeException ie) {
+					_portmapTimeoutTimer.Stop();
 
-                try {
-                    _portmapTimeoutTimer.Start();
-
-                    if (_globalOptions.IPProtocol == IPProtocol.Both ||
-                        _globalOptions.IPProtocol == IPProtocol.TCP) {
-                        service.InvokeAsync(portMappingAction.Name,
-                            tcpArgs.ToArray(), null,
-                            HandleInvoke,
-                            HandleInvokeError);
-                    }
-
-                    if (_globalOptions.IPProtocol == IPProtocol.Both ||
-                        _globalOptions.IPProtocol == IPProtocol.UDP) {
-                        service.InvokeAsync(portMappingAction.Name,
-                            udpArgs.ToArray(), null,
-                            HandleInvoke,
-                            HandleInvokeError);
-                    }
-                }
-                catch (UPnPInvokeException ie) {
-                    _portmapTimeoutTimer.dispose(); // Discard the timer.
-
-                    OnProgressFinish(new KeyHoleEventMessage(
-                        messageDescription: "UPnPInvokeException: " + ie.Message,
-                        messageCode: MessageCode.ErrUnknown,
-                        loggingLevel: EventLoggingLevel.Informational));
-                }
+					OnProgressFinish(new KeyHoleEventMessage(
+						messageDescription: "UPnPInvokeException: " + ie.Message,
+						messageCode: MessageCode.ErrUnknown,
+						loggingLevel: EventLoggingLevel.Informational));
+				}
+                
             }
         }
+
+		/// <summary>
+		/// Will delete an existing Port Map, if it exists.
+		/// </summary>
+		private void DeletePortMapping(IPProtocol ipProtocol, UPnPAction action, UPnPService service) {
+			var args = new List<UPnPArgument> {
+                new UPnPArgument("NewRemoteHost", ""),
+                new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
+                new UPnPArgument("NewProtocol", ipProtocol.ToString())
+            };
+
+			// TODO: Might want to properly handle return messages at some point.
+			service.InvokeAsync(action.Name, args.ToArray(), null, null, null);
+		}
+
+		/// <summary>
+		/// Will create a new Port Map, if possible.
+		/// </summary>
+		private void AddPortMapping(IPProtocol ipProtocol, DeviceServices device, UPnPAction action, UPnPService service) {
+			var args = new List<UPnPArgument> {
+                new UPnPArgument("NewRemoteHost", ""),
+                new UPnPArgument("NewExternalPort", _globalOptions.PortToBind),
+                new UPnPArgument("NewProtocol", ipProtocol.ToString()),
+                new UPnPArgument("NewInternalPort", _globalOptions.PortToBind),
+                new UPnPArgument("NewInternalClient", device.Device.InterfaceToHost.ToString()),
+                new UPnPArgument("NewEnabled", true),
+                new UPnPArgument("NewPortMappingDescription", _globalOptions.PortDescription),
+                new UPnPArgument("NewLeaseDuration", (UInt32) 3600)
+            };
+
+			// Send the Port Map request:
+			service.InvokeAsync(action.Name, args.ToArray(), null, HandleInvoke, HandleInvokeError);
+		}
 
         private void HandleInvokeError(UPnPService sender, string methodname, UPnPArgument[] args, UPnPInvokeException e,
             object tag) {
             if (e.UPNP == null) {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "Received error trying to map port " + args[2] + args[1] + ". UPnPInvokeException: " + e,
+                    messageDescription: "Received error trying to map port " + args[2].DataValue + args[1].DataValue + ". UPnPInvokeException: " + e,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
             }
             else {
                 OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: "Received error trying to map port " + args[2] + args[1] + ". UPnPInvokeException: [" + 
+                    messageDescription: "Received error trying to map port " + args[2].DataValue + args[1].DataValue + ". UPnPInvokeException: [" + 
                         e.UPNP.ErrorCode + "] " + e.UPNP.ErrorDescription,
                     messageCode: MessageCode.ErrUnknown,
                     loggingLevel: EventLoggingLevel.Informational));
@@ -142,10 +140,26 @@ namespace KeyHoleNAT {
 
         private void HandleInvoke(UPnPService sender, string methodname, UPnPArgument[] args, object returnvalue,
             object tag) {
-            OnProgressFinish(new KeyHoleEventMessage(
-                messageDescription: "Successfully mapped port " + args[2] + args[1] + ".",
+			// Stop the port map timer:
+			_portmapTimeoutTimer.Stop();
+
+            OnProgressUpdate(new KeyHoleEventMessage(
+                messageDescription: "Successfully mapped port " + args[2].DataValue + args[1].DataValue + ".",
                 messageCode: MessageCode.Success,
                 loggingLevel: EventLoggingLevel.Informational));
+
+			// Flag the port bind as successful:
+			if (args[2].DataValue.ToString() == "UDP")
+				_isUdpBound = true;
+			if (args[2].DataValue.ToString() == "TCP")
+				_isTcpBound = true;
+
+			// If both ports are bound, return progress finished:
+			if(_isTcpBound && _isUdpBound)
+				OnProgressFinish(new KeyHoleEventMessage(
+					messageDescription: "Successfully bound specified ports via UPnP.",
+					messageCode: MessageCode.Success,
+					loggingLevel: EventLoggingLevel.Informational));
         }
 
         private void OnDeviceDiscovery(UPnPSmartControlPoint sender, UPnPDevice device) {

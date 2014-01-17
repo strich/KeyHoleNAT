@@ -13,7 +13,9 @@ namespace KeyHoleTests {
                     enabled: true,
                     timeout: 5000),
                 globalOptions: new GlobalOptions(
-                    portToBind: 21899,
+                    portToBind: 17561,
+					portDescription: "",
+					ipProtocol: IPProtocol.Both,
                     loggingLevel: EventLoggingLevel.Debug),
                 onProgressUpdate: HandleProgressUpdate,
                 onProgressFinished: HandleProgressFinish);
