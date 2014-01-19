@@ -1,4 +1,6 @@
-﻿namespace KeyHoleNAT {
+﻿using System;
+
+namespace KeyHoleNAT {
     public class NATController {
         public delegate void ProgressUpdateHandler(NATController sender, KeyHoleEventMessage e);
 
@@ -24,7 +26,7 @@
         /// Asyncronous method to bind the port specified in the Global Options within the given timeout
         /// period.
         /// </summary>
-        public void BindPort() {
+		public void BindPort(UInt16 portToBind, IPProtocol ipProtocol = IPProtocol.Both, string portDescription = "") {
             // Attempt to bind a port via UPNP:
             upnpModule = new UPNPModule(UPNPOptions, GlobalOptions, HandleProgressUpdate, HandleProgressFinish);
             upnpModule.Start();

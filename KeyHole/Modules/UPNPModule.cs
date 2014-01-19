@@ -14,6 +14,7 @@ namespace KeyHoleNAT {
 	    private GlobalOptions _globalOptions;
 	    private bool _isUdpBound = false;
 		private bool _isTcpBound = false;
+	    private bool _discoveryPhaseEnded = false;
 
         public UPNPModule(UPNPOptions upnpOptions, GlobalOptions globalOptions, ProgressUpdateHandler onProgressUpdate,
             ProgressUpdateHandler onProgressFinish) {
@@ -38,9 +39,14 @@ namespace KeyHoleNAT {
                 loggingLevel: EventLoggingLevel.Informational));
         }
 
+		public bool BindPort() {
+			
+		}
+
         private void OnUPNPDiscoveryPhaseEnd() {
             // Set the instance of UPNPSmartControlPoint to null for garbage collection:
             _scp = null;
+	        _discoveryPhaseEnded = true;
             OnProgressUpdate("Finished discovery scan.");
             OnProgressUpdate("Found " + _activeDevices.Count + " UPnP enabled devices.");
 
@@ -50,6 +56,8 @@ namespace KeyHoleNAT {
                     messageDescription: "Error: " + MessageCode.ErrNoUPnPDevice + ": No UPnP capable devices were found.",
                     messageCode: MessageCode.ErrNoUPnPDevice,
                     loggingLevel: EventLoggingLevel.Informational));
+
+	            return;
             }
 
             // Attempt to port map on all devices found:
