@@ -17,12 +17,10 @@ namespace KeyHoleTests {
                 onProgressUpdate: HandleProgressUpdate,
                 onProgressFinished: HandleProgressFinish);
 
-		    Console.WriteLine("About to BindPort");
             nc.BindPort(
                 portToBind: 17561,
                 portDescription: "",
                 ipProtocol: IPProtocol.Both);
-            Console.WriteLine("After BindPort");
 
 			while(true) { }
 		}
