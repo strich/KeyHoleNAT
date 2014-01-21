@@ -20,6 +20,10 @@ namespace KeyHoleNAT {
 
             OnProgressUpdate += onProgressUpdate;
             OnProgressFinish += onProgressFinished;
+
+            // Start UPnP module:
+            if(UPNPOptions.Enabled)
+                upnpModule = new UPNPModule(UPNPOptions, GlobalOptions, HandleProgressUpdate, HandleProgressFinish);
         }
 
         /// <summary>
@@ -27,13 +31,8 @@ namespace KeyHoleNAT {
         /// period.
         /// </summary>
 		public void BindPort(UInt16 portToBind, IPProtocol ipProtocol = IPProtocol.Both, string portDescription = "") {
-            // Attempt to bind a port via UPNP:
-            upnpModule = new UPNPModule(UPNPOptions, GlobalOptions, HandleProgressUpdate, HandleProgressFinish);
-            upnpModule.Start();
-        }
-
-        public void BindSocket() {
-            // TODO
+            if(upnpModule != null)
+                upnpModule.BindPort(portToBind, ipProtocol, portDescription);
         }
 
         public event ProgressUpdateHandler OnProgressUpdate;

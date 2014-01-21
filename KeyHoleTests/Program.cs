@@ -13,14 +13,16 @@ namespace KeyHoleTests {
                     enabled: true,
                     timeout: 5000),
                 globalOptions: new GlobalOptions(
-                    portToBind: 17561,
-					portDescription: "",
-					ipProtocol: IPProtocol.Both,
                     loggingLevel: EventLoggingLevel.Debug),
                 onProgressUpdate: HandleProgressUpdate,
                 onProgressFinished: HandleProgressFinish);
 
-            nc.BindPort();
+		    Console.WriteLine("About to BindPort");
+            nc.BindPort(
+                portToBind: 17561,
+                portDescription: "",
+                ipProtocol: IPProtocol.Both);
+            Console.WriteLine("After BindPort");
 
 			while(true) { }
 		}
@@ -30,7 +32,7 @@ namespace KeyHoleTests {
 	    }
 
         private static void HandleProgressUpdate(NATController sender, KeyHoleEventMessage keyHoleEventMessage) {
-            Console.WriteLine(keyHoleEventMessage.MessageDescription);
+            Console.WriteLine(keyHoleEventMessage.MessageDescription + " | Code: " + keyHoleEventMessage.MessageCode);
 	    }
 	}
 }
