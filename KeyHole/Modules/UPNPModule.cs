@@ -112,7 +112,7 @@ namespace KeyHoleNAT {
             };
 
 			// TODO: Might want to properly handle return messages at some point.
-			service.InvokeSync(action.Name, args.ToArray());
+			service.InvokeAsync(action.Name, args.ToArray());
 		}
 
 		/// <summary>

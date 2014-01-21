@@ -10,13 +10,11 @@ namespace KeyHoleNAT {
 
         private UPNPModule upnpModule;
 
-        public NATController(GlobalOptions globalOptions) : this(new UPNPOptions(), new STUNOptions(), globalOptions, null, null) { }
-
-        public NATController(UPNPOptions upnpOptions, STUNOptions stunOptions, GlobalOptions globalOptions,
-            ProgressUpdateHandler onProgressUpdate, ProgressUpdateHandler onProgressFinished) {
-            UPNPOptions = upnpOptions;
-            STUNOptions = stunOptions;
-            GlobalOptions = globalOptions;
+		public NATController(UPNPOptions upnpOptions = null, STUNOptions stunOptions = null, GlobalOptions globalOptions = null,
+            ProgressUpdateHandler onProgressUpdate = null, ProgressUpdateHandler onProgressFinished = null) {
+			UPNPOptions = upnpOptions ?? new UPNPOptions();
+            STUNOptions = stunOptions ?? new STUNOptions();
+            GlobalOptions = globalOptions ?? new GlobalOptions();
 
             OnProgressUpdate += onProgressUpdate;
             OnProgressFinish += onProgressFinished;

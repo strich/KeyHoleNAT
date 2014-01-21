@@ -23,7 +23,7 @@
         protected void OnProgressFinish(KeyHoleEventMessage e) {
             if (ProgressFinish != null) {
                 ProgressFinish(this, new KeyHoleEventMessage(
-                    messageDescription: "[" + this + "] Error: " + e.MessageDescription,
+                    messageDescription: "[" + this + "] " + e.MessageDescription,
                     messageCode: e.MessageCode,
                     loggingLevel: e.LoggingLevel));
             }
