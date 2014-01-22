@@ -1839,7 +1839,7 @@ namespace OpenSource.UPnP
 
         internal UPnPService(double version)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             InvocationPipeline.OnResponse += new HTTPRequest.RequestHandler(HandleInvokeRequest);
 
             this.SubscribeCycleCallback = new LifeTimeMonitor.LifeTimeHandler(SubscribeCycleSink);
@@ -2420,7 +2420,6 @@ namespace OpenSource.UPnP
         }
         internal void ParseSCPD(String XML, int startLine)
         {
-            bool loadSchema = false;
             string schemaUrn = "";
 
             if (XML == "")
@@ -2448,7 +2447,6 @@ namespace OpenSource.UPnP
                             XMLDoc.MoveToAttribute(i);
                             if (XMLDoc.Prefix == "xmlns")
                             {
-                                loadSchema = true;
                                 schemaUrn = XMLDoc.Value;
                             }
                             // ToDo: Try to load the schema from the network first
@@ -2461,27 +2459,6 @@ namespace OpenSource.UPnP
                             //						}
                         }
                         XMLDoc.MoveToElement();
-
-                        if (loadSchema)
-                        {
-                            // Prompt Application for local Schema Location
-                            System.Windows.Forms.OpenFileDialog fd = new System.Windows.Forms.OpenFileDialog();
-                            fd.Multiselect = false;
-                            fd.Title = schemaUrn;
-                            if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                            {
-                                FileStream fs = (FileStream)fd.OpenFile();
-                                System.Text.UTF8Encoding U = new System.Text.UTF8Encoding();
-                                byte[] buffer = new byte[(int)fs.Length];
-                                fs.Read(buffer, 0, buffer.Length);
-                                UPnPComplexType[] complexTypes = UPnPComplexType.Parse(U.GetString(buffer));
-                                fs.Close();
-                                foreach (UPnPComplexType complexType in complexTypes)
-                                {
-                                    this.AddComplexType(complexType);
-                                }
-                            }
-                        }
                     }
 
 

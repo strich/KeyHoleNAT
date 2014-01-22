@@ -190,16 +190,6 @@ namespace OpenSource.Utilities
                     }
                     if (OnEvent != null) OnEvent(EventLogEntryType.Error, exception.Source, exception.StackTrace, name);
                 }
-
-                if (g_onExceptionShowMessage == true)
-                {
-                    ExceptionForm ef = new ExceptionForm(exception);
-                    if (ef.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
-                    ef.Dispose();
-                }
             }
             catch (Exception) { }
 		}

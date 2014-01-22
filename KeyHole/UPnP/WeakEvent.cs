@@ -30,7 +30,7 @@ namespace OpenSource.Utilities
 
 		public WeakEvent()
 		{	
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 		}
 
 		public void Fire()

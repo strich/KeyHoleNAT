@@ -38,7 +38,7 @@ namespace OpenSource.UPnP
 		}
 		public HTTPMessage(string version)
 		{
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 			TheHeaders = new Hashtable();
 			ResponseCode = -1;
 			ResponseData = "";
@@ -51,7 +51,6 @@ namespace OpenSource.UPnP
 		public object Clone()
 		{
 			object obj = this.MemberwiseClone();
-			OpenSource.Utilities.InstanceTracker.Add(obj);
 			return(obj);
 		}
 		/// <summary>

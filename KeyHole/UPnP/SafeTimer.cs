@@ -60,7 +60,7 @@ namespace OpenSource.UPnP
 			WaitFlag = false;
 			timeout = 0;
 			WOTcb = new WaitOrTimerCallback(HandleTimer);
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 		}
 		public SafeTimer(int Milliseconds, bool Auto):this()
 		{
@@ -70,7 +70,7 @@ namespace OpenSource.UPnP
 			//Interval = Milliseconds;
 			Interval = Math.Max(MINIMUM_INTERVAL, Milliseconds);
 			AutoReset = Auto;
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 		}
 		public void Start()
 		{

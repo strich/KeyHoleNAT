@@ -87,7 +87,7 @@ namespace OpenSource.UPnP
         /// <param name="onNewInterfaceSink">Interface Callback</param>
         public NetworkInfo(InterfaceHandler onNewInterfaceSink)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
 
             InterfacePoller.OnExpired += new LifeTimeMonitor.LifeTimeHandler(PollInterface);
 

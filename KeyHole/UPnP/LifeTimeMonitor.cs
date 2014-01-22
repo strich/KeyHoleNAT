@@ -62,7 +62,7 @@ namespace OpenSource.UPnP
 		{
 			SafeNotifyTimer.OnElapsed += new SafeTimer.TimeElapsedHandler(OnTimedEvent);
 			SafeNotifyTimer.AutoReset = false;
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 		}
 
 		private void OnTimedEvent()

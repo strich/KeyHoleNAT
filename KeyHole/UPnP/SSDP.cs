@@ -90,7 +90,7 @@ namespace OpenSource.UPnP
         /// <param name="Expiration">The number of seconds before a Refresh will be triggered</param>
         public SSDP(int Expiration)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             LifeTimeHandler = new LifeTimeMonitor.LifeTimeHandler(SearchTimerSink);
             SearchTimer.OnExpired += LifeTimeHandler;
 

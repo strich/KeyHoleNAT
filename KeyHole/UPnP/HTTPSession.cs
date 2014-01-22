@@ -349,7 +349,7 @@ namespace OpenSource.UPnP
 		/// <param name="State">StateObject</param>
 		public HTTPSession(IPEndPoint Local, IPEndPoint Remote, SessionHandler CreateCallback, SessionHandler CreateFailedCallback, Object State)
 		{
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 			local_ep = Local;
 			
 			OnCreateSession += CreateCallback;
@@ -380,7 +380,7 @@ namespace OpenSource.UPnP
 		{
 			/* Eveything calls this */
 
-			OpenSource.Utilities.InstanceTracker.Add(this);
+			
 
 			this.Connected = TheSocket.Connected;
 			local_ep = Local;

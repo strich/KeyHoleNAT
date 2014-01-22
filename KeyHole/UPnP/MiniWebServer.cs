@@ -86,7 +86,7 @@ namespace OpenSource.UPnP
         /// <param name="local">IPEndPoint to listen on</param>
         public MiniWebServer(IPEndPoint local)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
 
             SessionTimer.OnExpired += new LifeTimeMonitor.LifeTimeHandler(SessionTimerSink);
             KeepAliveTimer.OnExpired += new LifeTimeMonitor.LifeTimeHandler(KeepAliveSink);

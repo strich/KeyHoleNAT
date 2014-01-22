@@ -120,11 +120,6 @@ namespace OpenSource.UPnP
         internal Hashtable InvokerInfo = Hashtable.Synchronized(new Hashtable());
         private bool IsRoot = false;
 
-        private System.Drawing.Image _icon = null;
-        private System.Drawing.Image _icon2 = null;
-        // Note: Cannot be created dynamically from the icon property; http://www.dotnet247.com/247reference/msgs/49/248277.aspx
-        private System.Drawing.Icon _favicon = null;
-
         static private Hashtable CPWebServerTable;
         static private long DeviceCount = 0;
 
@@ -269,44 +264,6 @@ namespace OpenSource.UPnP
                 return parent;
             }
         }
-        /// <summary>
-        /// Reference to the icon for this device
-        /// </summary>
-        public System.Drawing.Image Icon
-        {
-            get
-            {
-                return _icon;
-            }
-            set
-            {
-                if (this.ControlPointOnly == false) _icon = value;
-            }
-        }
-        public System.Drawing.Image Icon2
-        {
-            get
-            {
-                return _icon2;
-            }
-            set
-            {
-                if (this.ControlPointOnly == false) _icon2 = value;
-            }
-        }
-
-        // Favicon. Will not be read from remote device
-        public System.Drawing.Icon favicon
-        {
-            get
-            {
-                return _favicon;
-            }
-            set
-            {
-                if (this.ControlPointOnly == false) _favicon = value;
-            }
-        }
 
         internal void Removed()
         {
@@ -348,7 +305,7 @@ namespace OpenSource.UPnP
         /// </summary>
         internal UPnPDevice()
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
 
             // Control Point Only
             parent = null;
@@ -387,7 +344,7 @@ namespace OpenSource.UPnP
 
         internal UPnPDevice(double version, String UDN)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             // Full Device
             IsRoot = false;
 
@@ -437,7 +394,7 @@ namespace OpenSource.UPnP
 
         internal UPnPDevice(int DeviceExpiration, double version, String RootDir)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             // Full Device
             IsRoot = true;
 
@@ -1323,36 +1280,6 @@ namespace OpenSource.UPnP
             else
             {
                 GetWhat = GetWhat.Substring(1);
-            }
-
-            if ((GetWhat == "icon.png") && (_icon != null))
-            {
-                lock (_icon)
-                {
-                    MemoryStream mstm = new MemoryStream();
-                    _icon.Save(mstm, System.Drawing.Imaging.ImageFormat.Png);
-                    msg.StatusCode = 200;
-                    msg.StatusData = "OK";
-                    msg.ContentType = "image/png";
-                    msg.BodyBuffer = mstm.ToArray();
-                    mstm.Close();
-                }
-                return (msg);
-            }
-
-            if ((GetWhat == "favicon.ico") && (_favicon != null))
-            {
-                lock (_favicon)
-                {
-                    MemoryStream mstm = new MemoryStream();
-                    _favicon.Save(mstm);
-                    msg.StatusCode = 200;
-                    msg.StatusData = "OK";
-                    msg.ContentType = "image/x-icon";
-                    msg.BodyBuffer = mstm.ToArray();
-                    mstm.Close();
-                }
-                return (msg);
             }
 
             bool SCPDok = false;
@@ -2594,11 +2521,6 @@ namespace OpenSource.UPnP
         void HandleIcon(HttpRequestor sender, bool success, object tag, string url, byte[] data)
         {
             InitialEventTable.Remove(sender);
-            if (success)
-            {
-                System.Drawing.Image i = System.Drawing.Image.FromStream(new MemoryStream(data));
-                if (i != null) _icon = i;
-            }
         }
 
         /// <summary>
@@ -2795,49 +2717,6 @@ namespace OpenSource.UPnP
             if (SerialNumber != null) XDoc.WriteElementString("serialNumber", SerialNumber);
             XDoc.WriteElementString("UDN", "uuid:" + UniqueDeviceName);
 
-            if (_icon != null)
-            {
-                lock (_icon)
-                {
-                    XDoc.WriteStartElement("iconList");
-                    XDoc.WriteStartElement("icon");
-                    XDoc.WriteElementString("mimetype", "image/png");
-                    XDoc.WriteElementString("width", _icon.Width.ToString());
-                    XDoc.WriteElementString("height", _icon.Height.ToString());
-                    XDoc.WriteElementString("depth", System.Drawing.Image.GetPixelFormatSize(_icon.PixelFormat).ToString());
-                    XDoc.WriteElementString("url", "/icon.png");
-                    XDoc.WriteEndElement();
-
-                    XDoc.WriteStartElement("icon");
-                    XDoc.WriteElementString("mimetype", "image/jpg");
-                    XDoc.WriteElementString("width", _icon.Width.ToString());
-                    XDoc.WriteElementString("height", _icon.Height.ToString());
-                    XDoc.WriteElementString("depth", System.Drawing.Image.GetPixelFormatSize(_icon.PixelFormat).ToString());
-                    XDoc.WriteElementString("url", "/icon.jpg");
-                    XDoc.WriteEndElement();
-
-                    if (_icon2 != null)
-                    {
-                        XDoc.WriteStartElement("icon");
-                        XDoc.WriteElementString("mimetype", "image/png");
-                        XDoc.WriteElementString("width", _icon2.Width.ToString());
-                        XDoc.WriteElementString("height", _icon2.Height.ToString());
-                        XDoc.WriteElementString("depth", System.Drawing.Image.GetPixelFormatSize(_icon.PixelFormat).ToString());
-                        XDoc.WriteElementString("url", "/icon2.png");
-                        XDoc.WriteEndElement();
-
-                        XDoc.WriteStartElement("icon");
-                        XDoc.WriteElementString("mimetype", "image/jpg");
-                        XDoc.WriteElementString("width", _icon2.Width.ToString());
-                        XDoc.WriteElementString("height", _icon2.Height.ToString());
-                        XDoc.WriteElementString("depth", System.Drawing.Image.GetPixelFormatSize(_icon2.PixelFormat).ToString());
-                        XDoc.WriteElementString("url", "/icon2.jpg");
-                        XDoc.WriteEndElement();
-                    }
-
-                    XDoc.WriteEndElement();
-                }
-            }
             if (Services.Length > 0)
             {
                 XDoc.WriteStartElement("serviceList");

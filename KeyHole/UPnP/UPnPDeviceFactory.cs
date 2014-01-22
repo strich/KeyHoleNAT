@@ -55,7 +55,7 @@ namespace OpenSource.UPnP
         /// </summary>
         public UPnPDeviceFactory()
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             CreateTable = Hashtable.Synchronized(new Hashtable());
         }
 
@@ -68,7 +68,7 @@ namespace OpenSource.UPnP
         /// <param name="failedCB">Failure Callback</param>
         public UPnPDeviceFactory(Uri DescLocation, int MaxSeconds, UPnPDeviceHandler deviceCB, UPnPDeviceFailedHandler failedCB, IPAddress localaddr, string usn)
         {
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             httprequestor = new HttpRequestor();
             httprequestor.OnRequestCompleted += new HttpRequestor.RequestCompletedHandler(httprequestor_OnRequestCompleted);
             expected_usn = usn;
@@ -174,7 +174,6 @@ namespace OpenSource.UPnP
                         ex.Data["v-url"] = url;
                         ex.Data["v-data"] = data;
                         ex.Data["checkpoint"] = checkpoint;
-                        OpenSource.UPnP.AutoUpdate.ReportCrash(System.Windows.Forms.Application.ProductName, ex);
                     }
                     return;
                 }
@@ -269,7 +268,6 @@ namespace OpenSource.UPnP
                 ex.Data["v-url"] = url;
                 ex.Data["v-data"] = data;
                 OpenSource.Utilities.EventLogger.Log(ex);
-                OpenSource.UPnP.AutoUpdate.ReportCrash(System.Windows.Forms.Application.ProductName, ex);
             }
         }
 

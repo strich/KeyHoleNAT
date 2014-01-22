@@ -98,7 +98,7 @@ namespace OpenSource.UPnP
         {
             KeepAliveHandler = new LifeTimeMonitor.LifeTimeHandler(KeepAliveSink);
             KeepAliveTimer.OnExpired += KeepAliveHandler;
-            OpenSource.Utilities.InstanceTracker.Add(this);
+            
             _PIPELINE = PIPELINE;
         }
 
