@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KeyHole</RootNamespace>
     <AssemblyName>KeyHole</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -32,19 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
+    <Reference Include="Mono.Nat">
+      <HintPath>C:\Users\Scott\Documents\GitHub\Mono.Nat\src\Mono.Nat\bin\Release\Mono.Nat.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeviceServices.cs" />
     <Compile Include="GlobalOptions.cs" />
     <Compile Include="NATController.cs" />
     <Compile Include="Module.cs" />
@@ -53,72 +46,6 @@
     <Compile Include="Modules\UPNPModule.cs" />
     <Compile Include="STUNOptions.cs" />
     <Compile Include="UPNPOptions.cs" />
-    <Compile Include="UPnP\AsyncSocket.cs" />
-    <Compile Include="UPnP\AutoUpdate.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UPnP\AutoUpdate.designer.cs">
-      <DependentUpon>AutoUpdate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UPnP\Base64.cs" />
-    <Compile Include="UPnP\DText.cs" />
-    <Compile Include="UPnP\EventLogger.cs" />
-    <Compile Include="UPnP\ExceptionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UPnP\HTTPMessage.cs" />
-    <Compile Include="UPnP\HTTPRequest.cs" />
-    <Compile Include="UPnP\HttpRequestor.cs" />
-    <Compile Include="UPnP\HTTPSession.cs" />
-    <Compile Include="UPnP\HTTPSessionWatcher.cs" />
-    <Compile Include="UPnP\InstanceTracker.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UPnP\InstanceTracker2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UPnP\LifeTimeMonitor.cs" />
-    <Compile Include="UPnP\MiniWebServer.cs" />
-    <Compile Include="UPnP\NetworkInfo.cs" />
-    <Compile Include="UPnP\Protocols.cs" />
-    <Compile Include="UPnP\SafeTimer.cs" />
-    <Compile Include="UPnP\SSDP.cs" />
-    <Compile Include="UPnP\StringCompresser.cs" />
-    <Compile Include="UPnP\SyncInvokeAdapter.cs" />
-    <Compile Include="UPnP\UPnPComplexType.cs" />
-    <Compile Include="UPnP\UPnPControlPoint.cs" />
-    <Compile Include="UPnP\UPnPDebugObject.cs" />
-    <Compile Include="UPnP\UPnPDevice.cs" />
-    <Compile Include="UPnP\UPnPDeviceFactory.cs" />
-    <Compile Include="UPnP\UPnPDeviceWatcher.cs" />
-    <Compile Include="UPnP\UPnPInternalSmartControlPoint.cs" />
-    <Compile Include="UPnP\UPnPModeratedStateVariable.cs" />
-    <Compile Include="UPnP\UPnPService.cs" />
-    <Compile Include="UPnP\UPnPServiceWatcher.cs" />
-    <Compile Include="UPnP\UPnPSmartControlPoint.cs" />
-    <Compile Include="UPnP\UPnPStringFormatter.cs" />
-    <Compile Include="UPnP\Utils.cs" />
-    <Compile Include="UPnP\WeakEvent.cs" />
-    <Compile Include="UPnP\__LockRMWO.cs" />
-    <Compile Include="UPnP\__ReadOnlyCollections.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="UPnP\AutoUpdate.resx">
-      <DependentUpon>AutoUpdate.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UPnP\ExceptionForm.resx">
-      <DependentUpon>ExceptionForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UPnP\InstanceTracker.resx">
-      <DependentUpon>InstanceTracker.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UPnP\InstanceTracker2.resx">
-      <DependentUpon>InstanceTracker2.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

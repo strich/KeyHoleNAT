@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSource.UPnP;
+using System.Threading;
+using Mono.Nat;
 
 namespace KeyHoleNAT {
     public class UPNPModule : Module {
         // Devices listed here have an active port map on them
-        private readonly List<DeviceServices> _activeDevices = new List<DeviceServices>();
-        private readonly SafeTimer _discoveryTimeoutTimer;
-        private readonly SafeTimer _portmapTimeoutTimer;
-        private UPnPSmartControlPoint _scp;
+		private readonly List<INatDevice> _activeDevices = new List<INatDevice>();
+        private readonly Timer _discoveryTimeoutTimer;
+		private readonly Timer _portmapTimeoutTimer;
         private UPNPOptions _upnpOptions;
 	    private GlobalOptions _globalOptions;
 	    private bool _isUdpBound = false;
@@ -24,7 +24,8 @@ namespace KeyHoleNAT {
             ProgressFinish += onProgressFinish;
 
             // Setup the discovery phase timer:
-            _discoveryTimeoutTimer = new SafeTimer(_upnpOptions.DiscoveryTimeout, false);
+	        _discoveryTimeoutTimer = new Timer(OnUPNPDiscoveryPhaseEnd);
+			disnew SafeTimer(_upnpOptions.DiscoveryTimeout, false));
             _discoveryTimeoutTimer.OnElapsed += OnUPNPDiscoveryPhaseEnd;
 
             // Setup the port map timer:
@@ -36,11 +37,21 @@ namespace KeyHoleNAT {
             // Start timer:
             _discoveryTimeoutTimer.Start();
 
-            // Setup the UPnP Smart Control Point:
-            _scp = new UPnPSmartControlPoint(OnDeviceDiscovery);
+            // Setup UPnP:
+			NatUtility.DeviceFound += DeviceFound;
+			NatUtility.DeviceLost += DeviceLost;
+			NatUtility.StartDiscovery();
         }
 
-        private void OnUPNPPortMapFail() {
+	    private void DeviceLost(object sender, DeviceEventArgs e) {
+		    throw new NotImplementedException();
+	    }
+
+	    private void DeviceFound(object sender, DeviceEventArgs e) {
+		    throw new NotImplementedException();
+	    }
+
+	    private void OnUPNPPortMapFail() {
             OnProgressFinish(new KeyHoleEventMessage(
                 messageDescription: "Port Mapping failed with an unknown timeout error.",
                 messageCode: MessageCode.ErrUnknown,

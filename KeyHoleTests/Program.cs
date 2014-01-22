@@ -9,6 +9,9 @@ namespace KeyHoleTests {
                     enabled: true,
                     discoveryTimeout: 5000,
 					portmapTimeout: 2000),
+					stunOptions: new STUNOptions(
+						enabled: true, 
+						timeout: 5000),
                 globalOptions: new GlobalOptions(
                     loggingLevel: EventLoggingLevel.Debug),
                 onProgressUpdate: HandleProgressUpdate,
