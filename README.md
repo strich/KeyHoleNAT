@@ -1,17 +1,14 @@
-KeyHoleNAT
-==========
+#KeyHoleNAT
 
 Lightweight implementation of the STUN method of port binding for NAT. Written in C# and cross-platform.
 Most of the STUN implementation is being done by [Mono.NAT](https://github.com/mono/Mono.Nat) as its a good lightweight and cross-platform UPnP library.
 I have wrapped Mono.NAT up and abstracted it away from the user facing implementation so I can add more port punching functionality later such as TURN.
 
-Dependencies
-============
+##Dependencies
 
 The only dependency the KeyHoleNAT library currently has is Mono.NAT. Both it and KeyHoleNAT can compile in Mono and .NET 2.0 up to v4.5.
 
-Quick Start
-============
+##Quick Start
 
 Quick and easy way to make a best effort attempt at binding a port:
 ```C#
