@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
 using Mono.Nat;
 
@@ -12,8 +11,6 @@ namespace KeyHoleNAT {
 		private readonly Timer _portmapTimeoutTimer;
         private UPNPOptions _upnpOptions;
 	    private GlobalOptions _globalOptions;
-	    private bool _isUdpBound = false;
-		private bool _isTcpBound = false;
 	    private bool _discoveryPhaseEnded = false;
 
         public UPNPModule(UPNPOptions upnpOptions, GlobalOptions globalOptions, ProgressUpdateHandler onProgressUpdate,
@@ -106,7 +103,12 @@ namespace KeyHoleNAT {
 		/// </summary>
 		private void DeletePortMapping(UInt16 portToBind, Protocol ipProtocol, INatDevice device) {
             Mapping args = new Mapping(ipProtocol, (int)portToBind, (int)portToBind);
-            device.DeletePortMap(args);
+
+			try {
+				device.DeletePortMap(args);
+			} catch {
+				// We don't care if it doesn't succeed.
+			}
 		}
 
 		/// <summary>

@@ -45,10 +45,6 @@ namespace KeyHoleNAT {
 
             // TODO: Handle errors here by moving on to the next method of NAT traversal, if necessary.
         }
-
-        ~NATController() {
-            // TODO
-        }
     }
 
     public enum EventLoggingLevel {
