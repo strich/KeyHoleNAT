@@ -72,7 +72,7 @@ namespace KeyHoleNAT {
                         AddPortMapping(portToBind, Protocol.Udp, portDescription, device);
                     }
                 } catch (Exception ex) {
-                    _portmapTimeoutTimer.Stop();
+                    //_portmapTimeoutTimer.Stop();
 
                     OnProgressFinish(new KeyHoleEventMessage(
                         messageDescription: "Port mapping error: " + ex.Message,
