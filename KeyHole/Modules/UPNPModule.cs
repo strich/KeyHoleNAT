@@ -21,13 +21,13 @@ namespace KeyHoleNAT {
             ProgressFinish += onProgressFinish;
 
             // Setup and start the discovery phase timer:
-	        _discoveryTimeoutTimer = new Timer(_upnpOptions.DiscoveryTimeout);
+	        _discoveryTimeoutTimer = new Timer(_upnpOptions.DiscoveryTimeout) {AutoReset = false};
             _discoveryTimeoutTimer.Elapsed += OnUPNPDiscoveryPhaseEnd;
             _discoveryTimeoutTimer.Start();
 
             // Setup the port map timer:
-            _portmapTimeoutTimer = new Timer(_upnpOptions.PortmapTimeout);
-            _portmapTimeoutTimer.Elapsed += OnUPNPPortMapFail;
+            //_portmapTimeoutTimer = new Timer(_upnpOptions.PortmapTimeout) {AutoReset = false};
+            //_portmapTimeoutTimer.Elapsed += OnUPNPPortMapFail;
 
             OnProgressUpdate("Beginning discovery scan.");
 
