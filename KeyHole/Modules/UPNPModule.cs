@@ -58,9 +58,12 @@ namespace KeyHoleNAT {
             foreach (var device in _activeDevices) {
                 /* Before we try to map a port to ourself, we will delete it in case someone else has already taken it: */
                 // TODO: Add an option to allow the user to enable or disable how aggressive we are being here.
+
+                OnProgressUpdate("Attempting to map port " + portToBind + "(Protocol " + ipProtocol + ")" + " on device with IP " + device.GetExternalIP());
+
                 try {
                     // Start the port map timeout timer:
-                    _portmapTimeoutTimer.Start();
+                    //_portmapTimeoutTimer.Start();
 
                     // Send the Port Map request:
                     if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.TCP) {
