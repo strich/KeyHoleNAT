@@ -1,129 +1,191 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Timers;
 using Mono.Nat;
 
 namespace KeyHoleNAT {
     public class UPNPModule : Module {
         // Devices listed here have an active port map on them
-		private readonly List<INatDevice> _activeDevices = new List<INatDevice>();
-        private readonly Timer _discoveryTimeoutTimer;
-		private readonly Timer _portmapTimeoutTimer;
-        private UPNPOptions _upnpOptions;
-	    private GlobalOptions _globalOptions;
-	    private bool _discoveryPhaseEnded = false;
+        private readonly List<INatDevice> _activeDevices = new List<INatDevice>();
+        private static UPNPOptions _upnpOptions;
+        private GlobalOptions _globalOptions;
+
+        private static Dictionary<Mapping, PortMapDeviceState[]> _portBindRequests;
 
         public UPNPModule(UPNPOptions upnpOptions, GlobalOptions globalOptions, ProgressUpdateHandler onProgressUpdate,
-            ProgressUpdateHandler onProgressFinish) {
+                          ProgressUpdateHandler onProgressFinish) {
             _upnpOptions = upnpOptions;
-	        _globalOptions = globalOptions;
+            _globalOptions = globalOptions;
             ProgressUpdate += onProgressUpdate;
             ProgressFinish += onProgressFinish;
 
-            // Setup and start the discovery phase timer:
-	        _discoveryTimeoutTimer = new Timer(_upnpOptions.DiscoveryTimeout) {AutoReset = false};
-            _discoveryTimeoutTimer.Elapsed += OnUPNPDiscoveryPhaseEnd;
-            _discoveryTimeoutTimer.Start();
-
-            // Setup the port map timer:
-            //_portmapTimeoutTimer = new Timer(_upnpOptions.PortmapTimeout) {AutoReset = false};
-            //_portmapTimeoutTimer.Elapsed += OnUPNPPortMapFail;
+            _portBindRequests = new Dictionary<Mapping, PortMapDeviceState[]>();
 
             OnProgressUpdate("Beginning discovery scan.");
 
             // Setup UPnP:
-			NatUtility.DeviceFound += DeviceFound;
+            NatUtility.DeviceFound += DeviceFound;
             NatUtility.StartDiscovery();
         }
 
-	    private void DeviceFound(object sender, DeviceEventArgs e) {
-            OnProgressUpdate("Discovered new device: " + e.Device.GetType().Name + " with external IP " + e.Device.GetExternalIP());
+        private void DeviceFound(object sender, DeviceEventArgs e) {
+            OnProgressUpdate("Discovered new device: " + e.Device.GetType().Name + " with external IP " +
+                             e.Device.GetExternalIP());
 
-            _activeDevices.Add(e.Device);
-	    }
+            var pbRequestsTemp = new Dictionary<Mapping, PortMapDeviceState[]>(_portBindRequests);
+            foreach(var pbRequest in pbRequestsTemp) {
+                bool deviceFound = false;
 
-	    private void OnUPNPPortMapFail(object state, ElapsedEventArgs elapsedEventArgs) {
-            OnProgressFinish(new KeyHoleEventMessage(
-                messageDescription: "Port Mapping failed with an unknown timeout error.",
-                messageCode: MessageCode.ErrUnknown,
-                loggingLevel: EventLoggingLevel.Informational));
-        }
+                for (int i = 0; i < pbRequest.Value.Length; i++) {
+                    if (pbRequest.Value[i].Device.Equals(e.Device))
+                        deviceFound = true;
+                }
 
-		public bool BindPort(UInt16 portToBind, IPProtocol ipProtocol, string portDescription) {
-            // Block until discovery phase is over:
-            while(!_discoveryPhaseEnded) {}
-
-            // Attempt to port map on all devices found:
-            // TODO: Figure out which device is the gateway
-            foreach (var device in _activeDevices) {
-                /* Before we try to map a port to ourself, we will delete it in case someone else has already taken it: */
-                // TODO: Add an option to allow the user to enable or disable how aggressive we are being here.
-
-                OnProgressUpdate("Attempting to map port " + portToBind + "(Protocol " + ipProtocol + ")" + " on device with IP " + device.GetExternalIP());
-
-                try {
-                    // Start the port map timeout timer:
-                    //_portmapTimeoutTimer.Start();
-
-                    // Send the Port Map request:
-                    if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.TCP) {
-                        DeletePortMapping(portToBind, Protocol.Tcp, device);
-                        AddPortMapping(portToBind, Protocol.Tcp, portDescription, device);
-                    }
-                    if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.UDP) {
-                        DeletePortMapping(portToBind, Protocol.Udp, device);
-                        AddPortMapping(portToBind, Protocol.Udp, portDescription, device);
-                    }
-                } catch (Exception ex) {
-                    //_portmapTimeoutTimer.Stop();
-
-                    OnProgressFinish(new KeyHoleEventMessage(
-                        messageDescription: "Port mapping error: " + ex.Message,
-                        messageCode: MessageCode.ErrUnknown,
-                        loggingLevel: EventLoggingLevel.Informational));
+                // Add the device:
+                if (deviceFound != true) {
+                    var pbList = pbRequest.Value.ToList();
+                    pbList.Add(new PortMapDeviceState { Device = e.Device });
+                    _portBindRequests[pbRequest.Key] = pbList.ToArray();
                 }
             }
-		    return true;
-		}
 
-        private void OnUPNPDiscoveryPhaseEnd(object state, ElapsedEventArgs elapsedEventArgs) {
-	        _discoveryPhaseEnded = true;
-            _discoveryTimeoutTimer.Stop();
-            OnProgressUpdate("Finished initial discovery scan.");
-            OnProgressUpdate("Found " + _activeDevices.Count + " UPnP enabled devices.");
+            UpdatePortMappingStateMachine();
+        }
 
-            // If there are no devices capable of UPnP Port Mapping then exit as failed:
-            if (_activeDevices.Count == 0) {
-                OnProgressFinish(new KeyHoleEventMessage(
-                    messageDescription: MessageCode.ErrNoUPnPDevice + ": No UPnP capable devices were found.",
-                    messageCode: MessageCode.ErrNoUPnPDevice,
-                    loggingLevel: EventLoggingLevel.Informational));
+        private static void UpdatePortMappingStateMachine() {
+            var pbRequestsTemp = new Dictionary<Mapping, PortMapDeviceState[]>(_portBindRequests);
+            foreach (var pbRequestTemp in pbRequestsTemp) {
+                for (int i = 0; i < pbRequestTemp.Value.Length; i++) {
+                    var mapping = pbRequestTemp.Key;
+                    var portMapDeviceState = pbRequestTemp.Value[i];
+
+                    switch (portMapDeviceState.PortMapState) {
+                        case PortMapState.None:
+                            if (/*_upnpOptions.AggressivePortMap*/ false) { // This isn't working as expected right now
+                                DeletePortMapping(mapping, portMapDeviceState.Device);
+                                _portBindRequests[mapping][i].PortMapState = PortMapState.DeleteRequestSent;
+                            } else {
+                                _portBindRequests[mapping][i].PortMapState = PortMapState.DeleteRequestSuccessful;
+                            }
+
+                            break;
+                        case PortMapState.DeleteRequestSent:
+                            break;
+                        case PortMapState.DeleteRequestSuccessful:
+                            AddPortMapping(mapping, portMapDeviceState.Device);
+                            _portBindRequests[mapping][i].PortMapState = PortMapState.RequestSent;
+                            break;
+                        case PortMapState.RequestSent:
+                            break;
+                        case PortMapState.RequestSuccessful:
+                            OnProgressFinish(new KeyHoleEventMessage(
+                                                 messageDescription: "Port map successful.",
+                                                 messageCode: MessageCode.Success,
+                                                 loggingLevel: EventLoggingLevel.Informational));
+                            _portBindRequests[mapping][i].PortMapState = PortMapState.RequestSuccessfulDone;
+                            break;
+                        case PortMapState.RequestSuccessfulDone:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
             }
         }
 
-		/// <summary>
-		/// Will delete an existing Port Map, if it exists.
-		/// </summary>
-		private void DeletePortMapping(UInt16 portToBind, Protocol ipProtocol, INatDevice device) {
-            Mapping args = new Mapping(ipProtocol, (int)portToBind, (int)portToBind);
+        public void BindPort(UInt16 portToBind, IPProtocol ipProtocol, string portDescription) {
+            List<PortMapDeviceState> portMapDevices = new List<PortMapDeviceState>();
+            foreach (var activeDevice in _activeDevices) {
+                portMapDevices.Add(new PortMapDeviceState{Device = activeDevice});
+            }
 
-			try {
-				device.DeletePortMap(args);
-			} catch {
-				// We don't care if it doesn't succeed.
-			}
-		}
+            if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.TCP) {
+                Mapping newPortMapping = new Mapping(Protocol.Tcp, portToBind, portToBind);
+                try {
+                    _portBindRequests.Add(newPortMapping, portMapDevices.ToArray());
+                } catch {}
+            }
+            if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.UDP) {
+                Mapping newPortMapping = new Mapping(Protocol.Udp, portToBind, portToBind);
+                try {
+                    _portBindRequests.Add(newPortMapping, portMapDevices.ToArray());
+                } catch { }
+            }
 
-		/// <summary>
-		/// Will create a new Port Map, if possible.
-		/// </summary>
-		private void AddPortMapping(UInt16 portToBind, Protocol ipProtocol, string portDescription, INatDevice device) {
-            Mapping args = new Mapping(ipProtocol, (int)portToBind, (int)portToBind);
-            device.CreatePortMap(args);
-		}
+            UpdatePortMappingStateMachine();
+        }
+
+        private static void DeletePortMapping(Mapping mapping, INatDevice device) {
+            PortMapAsyncResult pmar = new PortMapAsyncResult { Device = device, Mapping = mapping };
+            device.BeginDeletePortMap(mapping, DeletePortMapCallback, pmar);
+        }
+
+        private static void DeletePortMapCallback(IAsyncResult ar) {
+            INatDevice device = ((PortMapAsyncResult)ar.AsyncState).Device;
+            Mapping mapping = ((PortMapAsyncResult)ar.AsyncState).Mapping;
+
+            if (_portBindRequests.ContainsKey(mapping)) {
+                var portMapDeviceStates = _portBindRequests[mapping];
+
+                for (int i = 0; i < portMapDeviceStates.Count(); i++) {
+                    if (portMapDeviceStates[i].Device.Equals(device)) {
+                        portMapDeviceStates[i].PortMapState = PortMapState.DeleteRequestSuccessful;
+                    }
+                }
+
+                _portBindRequests[mapping] = portMapDeviceStates;
+            }
+
+            UpdatePortMappingStateMachine();
+        }
+
+        private static void AddPortMapping(Mapping mapping, INatDevice device) {
+            PortMapAsyncResult pmar = new PortMapAsyncResult { Device = device, Mapping = mapping };
+            device.BeginCreatePortMap(mapping, CreatePortMapCallback, pmar);
+        }
+
+
+        private static void CreatePortMapCallback(IAsyncResult ar) {
+            INatDevice device = ((PortMapAsyncResult)ar.AsyncState).Device;
+            Mapping mapping = ((PortMapAsyncResult)ar.AsyncState).Mapping;
+
+            if (_portBindRequests.ContainsKey(mapping)) {
+                var portMapDeviceStates = _portBindRequests[mapping];
+
+                for (int i = 0; i < portMapDeviceStates.Count(); i++) {
+                    if (portMapDeviceStates[i].Device.Equals(device)) {
+                        portMapDeviceStates[i].PortMapState = PortMapState.RequestSuccessful;
+                    }
+                }
+
+                _portBindRequests[mapping] = portMapDeviceStates;
+            }
+
+            UpdatePortMappingStateMachine();
+        }
 
         public override string ToString() {
             return "UPNP";
         }
+    }
+
+    struct PortMapAsyncResult {
+        public Mapping Mapping;
+        public INatDevice Device;
+    }
+
+    struct PortMapDeviceState {
+        public INatDevice Device;
+        public PortMapState PortMapState;
+    }
+
+    enum PortMapState {
+        None = 0,
+        DeleteRequestSent,
+        DeleteRequestSuccessful,
+        RequestSent,
+        RequestSuccessful,
+        RequestSuccessfulDone
     }
 }

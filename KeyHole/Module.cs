@@ -1,13 +1,13 @@
 ﻿namespace KeyHoleNAT {
     public class Module {
-        public delegate void ProgressUpdateHandler(object sender, KeyHoleEventMessage e);
+        public delegate void ProgressUpdateHandler(KeyHoleEventMessage e);
         public event ProgressUpdateHandler ProgressUpdate;
-        public event ProgressUpdateHandler ProgressFinish;
+        public static event ProgressUpdateHandler ProgressFinish;
 
         protected void OnProgressUpdate(KeyHoleEventMessage e) {
             if (ProgressUpdate != null) {
-                ProgressUpdate(this, new KeyHoleEventMessage(
-                    messageDescription: "[" + this + "] " + e.MessageDescription,
+                ProgressUpdate(new KeyHoleEventMessage(
+                    messageDescription: "[UPnP] " + e.MessageDescription,
                     messageCode: e.MessageCode,
                     loggingLevel: e.LoggingLevel));
             }
@@ -20,10 +20,10 @@
                 loggingLevel: EventLoggingLevel.Informational));
         }
 
-        protected void OnProgressFinish(KeyHoleEventMessage e) {
+        protected static void OnProgressFinish(KeyHoleEventMessage e) {
             if (ProgressFinish != null) {
-                ProgressFinish(this, new KeyHoleEventMessage(
-                    messageDescription: "[" + this + "] " + e.MessageDescription,
+                ProgressFinish(new KeyHoleEventMessage(
+                    messageDescription: "[UPnP] " + e.MessageDescription,
                     messageCode: e.MessageCode,
                     loggingLevel: e.LoggingLevel));
             }

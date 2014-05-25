@@ -2,7 +2,7 @@
 
 namespace KeyHoleNAT {
     public class NATController {
-        public delegate void ProgressUpdateHandler(NATController sender, KeyHoleEventMessage e);
+        public delegate void ProgressUpdateHandler(KeyHoleEventMessage e);
 
         public GlobalOptions GlobalOptions;
         public STUNOptions STUNOptions;
@@ -36,12 +36,12 @@ namespace KeyHoleNAT {
         public event ProgressUpdateHandler OnProgressUpdate;
         public event ProgressUpdateHandler OnProgressFinish;
 
-        private void HandleProgressUpdate(object sender, KeyHoleEventMessage keyHoleEventMessage) {
-            OnProgressUpdate(this, keyHoleEventMessage);
+        private void HandleProgressUpdate(KeyHoleEventMessage keyHoleEventMessage) {
+            OnProgressUpdate(keyHoleEventMessage);
         }
 
-        private void HandleProgressFinish(object sender, KeyHoleEventMessage keyHoleEventMessage) {
-            OnProgressFinish(this, keyHoleEventMessage);
+        private void HandleProgressFinish(KeyHoleEventMessage keyHoleEventMessage) {
+            OnProgressFinish(keyHoleEventMessage);
 
             // TODO: Handle errors here by moving on to the next method of NAT traversal, if necessary.
         }

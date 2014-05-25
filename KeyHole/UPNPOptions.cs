@@ -1,13 +1,15 @@
 ﻿namespace KeyHoleNAT {
     public class UPNPOptions {
         public bool Enabled;
-		public  int DiscoveryTimeout;
-		public  int PortmapTimeout;
+        /// <summary>
+        /// Aggressively maps a port by first deleting the exist port map if its assigned to another PC on the LAN.
+        /// </summary>
+        public bool AggressivePortMap;
 
-		public UPNPOptions(bool enabled = true, int discoveryTimeout = 5000, int portmapTimeout = 2000) {
+		public UPNPOptions(bool enabled = true, bool aggressivePortMap = true) {
             Enabled = enabled;
-			DiscoveryTimeout = discoveryTimeout;
-			PortmapTimeout = portmapTimeout;
+		    AggressivePortMap = aggressivePortMap;
+
 		}
     }
 }
