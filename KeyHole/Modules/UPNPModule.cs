@@ -101,13 +101,13 @@ namespace KeyHoleNAT {
             }
 
             if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.TCP) {
-                Mapping newPortMapping = new Mapping(Protocol.Tcp, portToBind, portToBind);
+                Mapping newPortMapping = new Mapping(Protocol.Tcp, portToBind, portToBind, (24 * 60 * 60));
                 try {
                     _portBindRequests.Add(newPortMapping, portMapDevices.ToArray());
                 } catch {}
             }
             if (ipProtocol == IPProtocol.Both || ipProtocol == IPProtocol.UDP) {
-                Mapping newPortMapping = new Mapping(Protocol.Udp, portToBind, portToBind);
+                Mapping newPortMapping = new Mapping(Protocol.Udp, portToBind, portToBind, (24 * 60 * 60));
                 try {
                     _portBindRequests.Add(newPortMapping, portMapDevices.ToArray());
                 } catch { }
